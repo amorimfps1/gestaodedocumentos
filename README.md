@@ -1,78 +1,86 @@
-# 📁 Sistema de Gestão Documental
+# Sistema de Gestão Documental
 
-> Solução web moderna, centralizada e intuitiva para armazenamento, organização, consulta, categorização e anotações em documentos digitais.
-
----
-
-## 📖 Sobre o Projeto
-
-O **Sistema de Gestão Documental** é uma aplicação web desenvolvida para simplificar e agilizar o fluxo de armazenamento e controle de arquivos e documentos em equipes e organizações. Com uma interface de página única (*Single-Page Application* - SPA), o sistema oferece uma experiência fluida para upload de arquivos, categorização por tipo, consulta com filtros em tempo real, visualização/download de anexos e histórico de anotações colaborativas.
-
-Além da interface web responsiva, o sistema conta com uma **API REST completa** acompanhada de documentação interativa via **Swagger (OpenAPI)** integrada com **Flask-RESTX**.
-
-> ⚠️ **Aviso de Protótipo / MVP**: Este projeto é um protótipo funcional / Produto Mínimo Viável (MVP). Desenvolvido para validação de fluxo e arquitetura, recomenda-se a inclusão de camadas adicionais de autenticação/autorização (JWT, RBAC), criptografia em repouso e conformidade com a LGPD antes de implantação em ambientes corporativos de produção.
+Solução web para armazenamento, categorização, gerenciamento e consulta de documentos digitais, integrando interface de usuário em página única (SPA) e API REST documentada via OpenAPI/Swagger.
 
 ---
 
-## ✨ Funcionalidades
+## Sumário
 
-- 📤 **Upload e Categorização de Documentos**:
-  - Suporte aos formatos **PDF**, **JPG** e **PNG**.
-  - Validação de integridade e limite de tamanho de até **16 MB** por arquivo.
-  - Categorização por tipo de documento (`geral`, `contrato`, `procuração`, `petição`, `certidão`, `outro`).
-  - Geração de nomes únicos no disco através de identificadores UUID (`uuid4`) e higienização via `secure_filename`, impedindo sobrescritas acidentais.
-- 📊 **Painel de Métricas (Dashboard)**:
-  - Contadores rápidos com total de documentos, distribuição por formato (PDF, imagens) e total de armazenamento utilizado em bytes.
-- 📋 **Listagem, Busca e Filtros**:
-  - Modos de visualização alternáveis entre **Lista** e **Grade**.
-  - Filtro rápido por tipo de arquivo (Todos, PDF, JPG, PNG).
-  - Campo de busca instantânea filtrando por título e descrição.
-  - Ordenação automática decrescente por data de envio.
-- 👁️ **Visualização e Download**:
-  - Acesso direto aos arquivos salvos através de endpoint dedicado (`/uploads/<nome_arquivo>`).
-- 💬 **Anotações e Comentários**:
-  - Registro de observações, pareceres e anotações atreladas diretamente a cada documento.
-  - Histórico cronológico decrescente com carimbo de data e hora.
-- 🗑️ **Exclusão Segura e Limpeza Física**:
-  - Modal de confirmação para prevenir exclusões acidentais.
-  - Exclusão do registro no banco com deleção simultânea do arquivo físico correspondente no disco.
-  - Exclusão em cascata relacional dos comentários atrelados.
-- 📚 **Documentação Interativa Swagger**:
-  - Interface Swagger UI disponível para consulta dos esquemas, rotas, payloads e realização de testes de requisições diretamente pelo navegador.
+- [Visão Geral](#visão-geral)
+- [Arquitetura e Tecnologias](#arquitetura-e-tecnologias)
+- [Funcionalidades](#funcionalidades)
+- [Modelagem do Banco de Dados](#modelagem-do-banco-de-dados)
+- [Documentação da API REST](#documentação-da-api-rest)
+- [Instalação e Execução Local](#instalação-e-execução-local)
+- [Instruções de Deploy no Render](#instruções-de-deploy-no-render)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Recomendações para Produção e Segurança](#recomendações-para-produção-e-segurança)
+- [Licença](#licença)
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## Visão Geral
 
-- **Backend**: [Python 3.8+](https://www.python.org/)
-- **Microframework Web**: [Flask 3.x](https://flask.palletsprojects.com/)
-- **API REST & Swagger**: [Flask-RESTX](https://flask-restx.readthedocs.io/) (Swagger UI / OpenAPI)
-- **Banco de Dados**: [SQLite3](https://www.sqlite.org/) (com integridade referencial via Foreign Keys ativadas, índices e context manager)
-- **Frontend**: HTML5 semântico, CSS3 moderno (design responsivo com variáveis CSS e componentes flexíveis) e Vanilla JavaScript (Fetch API assíncrona)
-- **Servidor Web**: Servidor embutido Werkzeug / Flask
+O Sistema de Gestão Documental é uma aplicação desenvolvida para centralizar e organizar o fluxo operacional de arquivos e registros em equipes e departamentos. Com arquitetura baseada em Single-Page Application (SPA), a aplicação proporciona uma experiência ágil para upload de documentos, categorização temática, busca com filtragem instantânea em memória, visualização/download de anexos e gestão de anotações colaborativas.
+
+Além da interface web responsiva, o sistema disponibiliza uma API REST padronizada, documentada interativamente através de Swagger UI via Flask-RESTX.
 
 ---
 
-## 🗄️ Banco de Dados e Modelagem
+## Arquitetura e Tecnologias
 
-O sistema utiliza o **SQLite3** (`app.db`), configurado com foco em consistência relacional e desempenho.
+- Backend: Python 3.8+ / Python 3.11+
+- Microframework Web: Flask 3.x
+- Servidor WSGI de Produção: Gunicorn
+- Padronização e Documentação de API: Flask-RESTX (OpenAPI / Swagger UI)
+- Banco de Dados Relacional: SQLite3 com integridade referencial habilitada (PRAGMA foreign_keys = ON)
+- Frontend: HTML5 semântico, CSS3 com variáveis customizadas, Vanilla JavaScript assíncrono (Fetch API)
+- Sanitização e Armazenamento Seguro: Werkzeug (`secure_filename`) e identificadores únicos `uuid4`
 
-### Melhorias e Ajustes Implementados no DB
+---
 
-1. **Classificação por Tipo de Documento**:
-   - Adicionada a coluna `tipo` na tabela `documentos`, permitindo categorizar cada arquivo (ex: `contrato`, `procuração`, `certidão`, `geral`).
-2. **Controle Físico e Métricas de Armazenamento**:
-   - Registro de `caminho_arquivo` e `tamanho_bytes` diretamente na tabela `documentos`, viabilizando o cálculo exato do espaço consumido e garantindo a localização física do arquivo para remoção segura.
-3. **Integridade Referencial com Chaves Estrangeiras (`PRAGMA foreign_keys = ON`)**:
-   - No SQLite, chaves estrangeiras são desativadas por padrão. A integridade referencial foi ativada explicitamente tanto no momento da criação das tabelas (`init_db`) quanto em cada conexão aberta pela aplicação (`get_db_connection`).
-4. **Deleção em Cascata (`ON DELETE CASCADE`)**:
-   - A tabela `comentarios` possui a restrição `FOREIGN KEY (documento_id) REFERENCES documentos(id) ON DELETE CASCADE`. Ao excluir um documento, todos os comentários relacionados a ele são excluídos automaticamente, evitando registros órfãos.
-5. **Índice de Desempenho (`idx_comentarios_documento`)**:
-   - Criação do índice `idx_comentarios_documento` na coluna `documento_id` da tabela `comentarios`, otimizando leituras e agregações de comentários por documento.
-6. **Gerenciador de Contexto (`get_db_connection`)**:
-   - Implementado com `@contextmanager` do Python para garantir abertura, configuração de `row_factory = sqlite3.Row`, ativação de PRAGMA e encerramento seguro de conexões, mesmo em casos de exceção.
+## Funcionalidades
 
-### Estrutura das Tabelas (DDL)
+### 1. Upload e Classificação de Arquivos
+- Suporte aos formatos PDF, JPG e PNG.
+- Validação estrita de extensões e limite máximo de tamanho de 16 MB por arquivo.
+- Categorização pré-definida por tipo (geral, contrato, procuração, petição, certidão, outro).
+- Prevenção de colisões e sobreescritas através da geração de identificadores UUID (`uuid4`) atrelados aos nomes higienizados dos arquivos.
+
+### 2. Painel de Métricas (Dashboard)
+- Contadores consolidados com total de documentos cadastrados.
+- Distribuição quantitativa por tipo e formato (PDF e imagens).
+- Medição e exibição do volume total de armazenamento utilizado em bytes.
+
+### 3. Pesquisa, Filtros e Modos de Exibição
+- Busca em tempo real aplicada a título e descrição.
+- Filtros rápidos de seleção por formato de arquivo.
+- Alternância de visualização entre formatos de Lista e Grade (Cards).
+- Ordenação cronológica decrescente automática com base na data de envio.
+
+### 4. Gestão de Anotações e Pareceres
+- Registro de comentários cronológicos vinculados a cada documento.
+- Histórico completo com data e hora de inclusão.
+
+### 5. Exclusão Segura e Limpeza Física
+- Janela modal de confirmação para evitar exclusões involuntárias.
+- Exclusão atômica: remove o registro do banco de dados, deleta os comentários em cascata e apaga o arquivo físico correspondente no disco.
+
+### 6. Documentação Interativa via Swagger
+- Interface gráfica Swagger UI para inspeção de esquemas, rotas, tipos de dados e teste de endpoints diretamente pelo navegador.
+
+---
+
+## Modelagem do Banco de Dados
+
+A persistência relacional é gerenciada pelo SQLite3 (`app.db`), configurado com foco em consistência de dados:
+
+1. Integridade Referencial: A diretiva `PRAGMA foreign_keys = ON` é executada explicitamente na criação das tabelas e em todas as conexões abertas pela aplicação através de um context manager (`get_db_connection`).
+2. Deleção em Cascata (`ON DELETE CASCADE`): A chave estrangeira na tabela `comentarios` garante que a exclusão de um registro na tabela `documentos` propague a remoção imediata de todas as suas anotações vinculadas.
+3. Indexação para Otimização: Índice dedicado `idx_comentarios_documento` na coluna `documento_id` para acelerar consultas e agrupamentos de comentários.
+4. Gerenciamento Seguro de Conexões: Implementação do padrão Python `@contextmanager` para abertura, configuração de `row_factory = sqlite3.Row` e encerramento determinístico das conexões.
+
+### Esquema Relacional (DDL)
 
 ```sql
 -- Tabela de Documentos
@@ -96,159 +104,155 @@ CREATE TABLE IF NOT EXISTS comentarios (
     FOREIGN KEY (documento_id) REFERENCES documentos(id) ON DELETE CASCADE
 );
 
--- Índice de Otimização
+-- Índice de Desempenho
 CREATE INDEX IF NOT EXISTS idx_comentarios_documento 
 ON comentarios(documento_id);
 ```
 
 ---
 
-## 📖 Documentação da API com Swagger
+## Documentação da API REST
 
-A API foi padronizada utilizando a biblioteca **Flask-RESTX**, que gera automaticamente a documentação OpenAPI e fornece a interface interativa do **Swagger UI**.
+A API disponibiliza endpoints REST sob o prefixo `/api/documentos`. A interface interativa Swagger UI pode ser acessada em `/docs`.
 
-### Como Acessar o Swagger UI
+### Tabela de Endpoints
 
-Com a aplicação em execução, acesse pelo navegador:
+| Método | Endpoint | Descrição | Entrada / Parâmetros | Código Sucesso |
+| :--- | :--- | :--- | :--- | :--- |
+| GET | `/` | Interface web principal (SPA) | Nenhuma | 200 OK |
+| GET | `/docs` | Documentação interativa Swagger UI | Nenhuma | 200 OK |
+| GET | `/api/documentos` | Retorna a listagem completa de documentos | Nenhuma | 200 OK |
+| POST | `/api/documentos` | Realiza o upload de um novo documento | `multipart/form-data`<br>- `arquivo`: Arquivo (PDF, JPG, PNG)<br>- `titulo`: String (obrigatório)<br>- `descricao`: String (opcional) | 201 Created |
+| GET | `/api/documentos/<id>` | Retorna os detalhes de um documento específico | Parâmetro de rota: `id` (int) | 200 OK |
+| DELETE | `/api/documentos/<id>` | Deleta o documento, arquivo físico e comentários | Parâmetro de rota: `id` (int) | 200 OK |
+| GET | `/uploads/<nome_arquivo>` | Serve o arquivo salvo para leitura ou download | Parâmetro de rota: `nome_arquivo` (string) | 200 OK |
+| GET | `/api/documentos/<id>/comentarios` | Lista os comentários de um documento | Parâmetro de rota: `id` (int) | 200 OK |
+| POST | `/api/documentos/<id>/comentarios` | Insere novo comentário em um documento | `application/json`<br>`{ "texto": "Texto do comentário" }` | 201 Created |
 
-```
-http://localhost:5000/docs
-```
-*(ou `http://127.0.0.1:5000/docs`)*
+### Códigos de Status HTTP
 
-### Recursos do Swagger
-
-- **Exploração Interativa ("Try it out")**: Teste requisições `GET`, `POST` e `DELETE` diretamente no navegador.
-- **Upload via Multipart**: O Swagger está configurado com um parser para upload de arquivos (`multipart/form-data`), permitindo enviar o arquivo físico junto com título e descrição direto pela interface de teste.
-- **Modelos de Dados (DTO / Schemas)**:
-  - `Documento`: Estrutura de retorno dos dados de um documento.
-  - `ComentarioInput`: Schema de entrada para novos comentários (`{"texto": "..."}`).
-  - `Comentario`: Estrutura de dados de comentários retornados.
-  - `MensagemSucesso` e `MensagemErro`: Respostas padrão de confirmação ou erro da API.
-- **Códigos de Resposta Documentados**: Demonstração de retornos `200 OK`, `201 Created`, `400 Bad Request` e `404 Not Found`.
-
----
-
-## 📋 Pré-requisitos
-
-- **Python 3.8** ou superior instalado na máquina.
-- Gerenciador de pacotes **pip** atualizado.
-- Navegador web moderno (Chrome, Edge, Firefox, Safari).
+- 200 OK: Requisição processada com êxito.
+- 201 Created: Recurso cadastrado com sucesso.
+- 400 Bad Request: Dados obrigatórios ausentes, extensão inválida ou carga incompatível.
+- 404 Not Found: Registro ou documento não localizado.
+- 413 Payload Too Large: Tamanho do arquivo excede o limite estipulado de 16 MB.
+- 500 Internal Server Error: Falha interna não tratada no servidor.
 
 ---
 
-## 🚀 Instalação e Execução
+## Instalação e Execução Local
 
-### 1. Clonar ou Acessar a Pasta do Projeto
+### Pré-requisitos
+- Python 3.8 ou superior instalado.
+- Gerenciador de pacotes pip atualizado.
 
-Navegue até o diretório onde o projeto está localizado:
-
+### 1. Clonar ou Acessar o Diretório do Projeto
 ```bash
 cd sistemadegestaodedocumentos
 ```
 
-### 2. Criar e Ativar o Ambiente Virtual
-
-- **No Windows (PowerShell):**
+### 2. Configurar o Ambiente Virtual
+- No Windows (PowerShell):
   ```powershell
   python -m venv venv
   .\venv\Scripts\Activate.ps1
   ```
-
-- **No Windows (Prompt de Comando - CMD):**
+- No Windows (Prompt de Comando):
   ```cmd
   python -m venv venv
   .\venv\Scripts\activate.bat
   ```
-
-- **No Linux / macOS (Bash / Zsh):**
+- No Linux ou macOS (Bash/Zsh):
   ```bash
   python3 -m venv venv
   source venv/bin/activate
   ```
 
-### 3. Instalar as Dependências
-
-Instale todos os pacotes necessários através do arquivo `requirements.txt`:
-
+### 3. Instalar Dependências
 ```bash
 pip install -r requirements.txt
 ```
 
-As dependências principais incluem:
-- `Flask`
-- `flask-restx`
-- `Werkzeug`
-
-### 4. Executar a Aplicação
-
-Inicie o servidor localmente:
-
-```bash
-python app.py
-```
-
-Durante a inicialização, o sistema realiza automaticamente:
-1. A verificação e criação da pasta `uploads/` se ela não existir.
-2. A inicialização do banco de dados SQLite (`app.db`) e de suas tabelas e índices via `init_db()`.
+### 4. Executar o Servidor Local
+- Modo de Desenvolvimento:
+  ```bash
+  python app.py
+  ```
+- Modo de Produção Local (Gunicorn em ambientes Linux/WSL):
+  ```bash
+  gunicorn app:app --bind 0.0.0.0:5000
+  ```
 
 ### 5. Acessar a Aplicação
-
-- **Interface Web Principal (SPA)**:
-  ```
-  http://localhost:5000/
-  ```
-
-- **Documentação Interativa Swagger**:
-  ```
-  http://localhost:5000/docs
-  ```
+- Aplicação Web: `http://localhost:5000/`
+- Documentação Swagger: `http://localhost:5000/docs`
 
 ---
 
-## 📁 Estrutura do Projeto
+## Instruções de Deploy no Render
+
+O projeto está preparado para deploy no serviço de hospedagem em nuvem Render como um Web Service.
+
+### Passo a Passo no Painel do Render
+
+1. Crie uma conta no [Render](https://render.com/) e acerte a conexão com seu repositório Git (GitHub ou GitLab).
+2. Clique em **New +** e selecione **Web Service**.
+3. Selecione o repositório deste projeto.
+4. Preencha as configurações fundamentais:
+   - **Name**: `sistema-gestao-documental` (ou o nome de sua preferência)
+   - **Language / Runtime**: `Python`
+   - **Branch**: `main` (ou a branch de publicação correspondente)
+   - **Region**: Selecione a região geográfica mais próxima do seu público
+   - **Build Command**:
+     ```bash
+     pip install -r requirements.txt
+     ```
+   - **Start Command**:
+     ```bash
+     gunicorn app:app
+     ```
+5. Clique em **Deploy Web Service** para iniciar a compilação e publicação.
+
+### Variáveis de Ambiente Recomendadas
+
+Na aba **Environment** do serviço no Render:
+- `PYTHON_VERSION`: `3.11.0` (ou versão correspondente do ambiente)
+- `FLASK_DEBUG`: `false`
+
+### Considerações sobre Persistência de Dados no Render
+
+Por padrão, instâncias gratuitas em plataformas como o Render utilizam sistemas de arquivos efêmeros (*ephemeral filesystem*), o que implica que novos deploys ou reinicializações do contêiner redefinem arquivos locais gerados em tempo de execução.
+
+Para implantações definitivas em produção, considere as seguintes práticas:
+- **Armazenamento de Anexos**: Configurar um Render Persistent Disk montado no diretório `uploads/` ou integrar o backend a serviços de armazenamento em nuvem de objetos (Amazon S3, Cloudflare R2 ou Google Cloud Storage).
+- **Banco de Dados**: Manter o arquivo SQLite (`app.db`) no Render Disk persistente ou migrar o acesso a dados para um banco de dados relacional gerenciado como PostgreSQL.
+
+---
+
+## Estrutura do Projeto
 
 ```text
 sistemadegestaodedocumentos/
-├── app.py                 # Aplicação Flask, Blueprint Flask-RESTX e controladores REST
-├── database.py            # Configuração, inicialização DDL e conexão com SQLite
-├── requirements.txt       # Dependências do projeto (Flask, flask-restx, Werkzeug, etc.)
-├── .gitignore             # Arquivos e pastas ignorados no controle de versão
-├── README.md              # Documentação completa do projeto
-├── templates/
-│   └── index.html         # Interface SPA completa (HTML5, CSS3 e JavaScript)
-└── uploads/               # Diretório onde os arquivos enviados são salvos fisicamente
+|-- app.py                 # Aplicação Flask, rotas web, blueprint Flask-RESTX e API
+|-- database.py            # Inicialização DDL, conexão e gerenciamento de banco de dados
+|-- requirements.txt       # Relação de dependências do projeto com suporte a Gunicorn
+|-- .gitignore             # Arquivos e diretórios excluídos do controle de versão
+|-- README.md              # Documentação técnica do projeto
+|-- templates/
+|   `-- index.html         # Interface SPA completa com estilos CSS e scripts embutidos
+`-- uploads/               # Diretório local para gravação física dos arquivos enviados
 ```
 
 ---
 
-## 🔌 Endpoints da API REST
+## Recomendações para Produção e Segurança
 
-Todas as rotas da API estão organizadas sob o namespace `/api/documentos`:
-
-| Método | Rota | Descrição | Parâmetros / Corpo | Código Sucesso |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/` | Interface principal do sistema (SPA) | Nenhum | `200 OK` |
-| `GET` | `/docs` | Documentação interativa Swagger UI | Nenhum | `200 OK` |
-| `GET` | `/api/documentos` | Retorna a listagem de todos os documentos | Nenhum | `200 OK` |
-| `POST` | `/api/documentos` | Realiza o upload de um novo documento | `multipart/form-data`<br>• `arquivo`: Arquivo (PDF, JPG, PNG)<br>• `titulo`: String (obrigatório)<br>• `descricao`: String (opcional) | `201 Created` |
-| `GET` | `/api/documentos/<id>` | Retorna os detalhes de um documento específico | Parâmetro de rota: `id` (int) | `200 OK` |
-| `DELETE` | `/api/documentos/<id>` | Deleta o documento, arquivo no disco e comentários associados | Parâmetro de rota: `id` (int) | `200 OK` |
-| `GET` | `/uploads/<nome_arquivo>` | Serve o arquivo físico para visualização ou download | Parâmetro de rota: `nome_arquivo` (string) | `200 OK` |
-| `GET` | `/api/documentos/<id>/comentarios` | Lista os comentários de um documento | Parâmetro de rota: `id` (int) | `200 OK` |
-| `POST` | `/api/documentos/<id>/comentarios` | Adiciona um novo comentário ao documento | `application/json`<br>`{ "texto": "Texto do comentário" }` | `201 Created` |
-
-### Tratamento e Códigos de Status HTTP
-
-- `200 OK`: Requisição processada com sucesso.
-- `201 Created`: Recurso criado com sucesso (upload ou comentário).
-- `400 Bad Request`: Dados inválidos, parâmetros ausentes ou formato de arquivo não suportado.
-- `404 Not Found`: Documento ou recurso solicitado não encontrado.
-- `413 Payload Too Large`: Arquivo excede o limite máximo permitido de 16 MB.
-- `500 Internal Server Error`: Erro inesperado durante o processamento no servidor.
+- Autenticação e Autorização: Recomenda-se implementar autenticação via tokens (JWT) e controle de acesso baseado em papéis (RBAC) antes de disponibilizar o sistema em ambientes corporativos abertos.
+- Criptografia: Assegurar tráfego exclusivo sob protocolo HTTPS/TLS e aplicar criptografia para arquivos confidenciais em repouso.
+- Conformidade Regulatória: Adequar a coleta e retenção de arquivos com dados pessoais às diretrizes da LGPD (Lei Geral de Proteção de Dados).
 
 ---
 
-## 📄 Licença
+## Licença
 
-Este projeto está distribuído sob a licença [MIT](https://opensource.org/licenses/MIT).
+Este projeto é disponibilizado sob os termos da licença [MIT](https://opensource.org/licenses/MIT).
