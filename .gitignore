@@ -1,0 +1,49 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+
+# Ambientes Virtuais (Virtual Environments)
+venv/
+.venv/
+env/
+ENV/
+
+# Arquivos de IDEs e Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Arquivos de Sistema Operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Banco de Dados SQLite
+*.db
+*.sqlite
+*.sqlite3
+
+# Pasta de Uploads
+uploads/
+
+# Variáveis de Ambiente
+.env
+.env.*
+!.env.example
+
+# Distribuição e Build
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Testes, Cobertura e Tipagem
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/

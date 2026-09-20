@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão Documental</title>
+    <style>
+        :root {
+            --base:          #2B3A55;
+            --base-dark:     #1E2B40;
+            --base-light:    #3D5274;
+            --ardosia:       #2E4A5A;
+            --indigo:        #3B3560;
+
+            /* Complementar (40°) */
+            --ambar:         #B8893A;
+            --ambar-hover:   #A0762E;
+            --ambar-light:   #F5EDE0;
+
+            /* Triádicas */
+            --oliva:         #5A7A42;
+            --oliva-light:   #EAF2E4;
+            --bordo:         #8C3A42;
+            --bordo-light:   #F6E8EA;
+
+            /* Neutros (frios) */
+            --bg:            #F2F4F7;
+            --bg-warm:       #FAFAF8;
+            --card:          #FFFFFF;
+            --text:          #2C3344;
+            --text-mid:      #5A6474;
+            --text-muted:    #8A94A2;
+            --text-light:    #B0B8C4;
+            --border:        #DFE3EA;
+            --border-light:  #ECF0F4;
+
+            /* Sombras e raios */
+            --shadow-sm:     0 1px 3px rgba(43,58,85,0.06);
+            --shadow-md:     0 4px 14px rgba(43,58,85,0.09);
+            --shadow-lg:     0 8px 28px rgba(43,58,85,0.12);
+            --radius-sm:     6px;
+            --radius-md:     10px;
+            --radius-lg:     14px;
+            --transition:    all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* =============== SVG Icon base =============== */
+        .icon {
+            display: inline-flex;
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+        .icon svg {
+            width: 100%;
+            height: 100%;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .icon-lg { width: 22px; height: 22px; }
+        .icon-xl { width: 28px; height: 28px; }
+
+        /* =============== Sidebar =============== */
+        .sidebar {
+            width: 252px;
+            background: var(--base);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-brand {
+            padding: 1.6rem 1.4rem 1.3rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .sidebar-brand .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .logo-mark {
+            width: 32px; height: 32px;
+            background: var(--ambar);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-mark svg {
+            width: 18px; height: 18px;
+            fill: none; stroke: var(--base-dark);
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+
+        .sidebar-brand .tagline {
+            font-size: 0.68rem;
+            opacity: 0.45;
+            margin-top: 0.25rem;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+        }
+
+        .sidebar-nav { flex: 1; padding: 0.8rem 0; }
+
+        .nav-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1.4px;
+            color: rgba(255,255,255,0.3);
+            padding: 0.9rem 1.4rem 0.35rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.65rem 1.4rem;
+            color: rgba(255,255,255,0.6);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.87rem;
+            border-left: 3px solid transparent;
+        }
+        .nav-item:hover {
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.9);
+        }
+        .nav-item.active {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border-left-color: var(--ambar);
+        }
+
+        .nav-item .badge {
+            margin-left: auto;
+            background: var(--ambar);
+            color: var(--base-dark);
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.1rem 0.5rem;
+            border-radius: 10px;
+        }
+
+        .sidebar-footer {
+            padding: 1rem 1.4rem;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.3);
+        }
+
+        /* =============== Mobile =============== */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 52px;
+            background: var(--base);
+            z-index: 200;
+            align-items: center;
+            padding: 0 1rem;
+            gap: 0.6rem;
+        }
+        .hamburger {
+            background: none; border: none;
+            color: #fff; cursor: pointer; padding: 0.4rem;
+        }
+        .hamburger svg { width: 22px; height: 22px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; }
+        .mobile-header .m-logo { color: #fff; font-size: 1rem; font-weight: 700; }
+
+        .sidebar-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45); z-index: 99;
+        }
+
+        /* =============== Main =============== */
+        .main-content {
+            flex: 1;
+            margin-left: 252px;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 0.9rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky; top: 0; z-index: 50;
+        }
+
+        .topbar-title h1 {
+            font-size: 1.2rem; font-weight: 700; color: var(--base);
+        }
+        .topbar-title p {
+            font-size: 0.77rem; color: var(--text-muted); margin-top: 0.1rem;
+        }
+
+        .topbar-actions { display: flex; align-items: center; gap: 0.7rem; }
+
+        .search-box { position: relative; }
+        .search-box input {
+            padding: 0.5rem 0.85rem 0.5rem 2.1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.82rem; width: 240px;
+            transition: var(--transition);
+            background: var(--bg);
+            font-family: inherit;
+        }
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--base-light);
+            box-shadow: 0 0 0 3px rgba(43,58,85,0.08);
+            background: #fff;
+        }
+        .search-box .s-icon {
+            position: absolute; left: 0.65rem; top: 50%;
+            transform: translateY(-50%); color: var(--text-muted);
+        }
+
+        .content { padding: 1.5rem 2rem; max-width: 1100px; }
+
+        /* =============== Stats =============== */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(195px, 1fr));
+            gap: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border-radius: var(--radius-md);
+            padding: 1.1rem 1.2rem;
+            box-shadow: var(--shadow-sm);
+            display: flex; align-items: center; gap: 0.9rem;
+            border: 1px solid var(--border-light);
+            transition: var(--transition);
+        }
+        .stat-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+
+        .stat-dot {
+            width: 44px; height: 44px;
+            border-radius: var(--radius-sm);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--card);
+        }
+        .stat-dot.c-base    { background: var(--base); }
+        .stat-dot.c-ardosia { background: var(--ardosia); }
+        .stat-dot.c-ambar   { background: var(--ambar); }
+        .stat-dot.c-indigo  { background: var(--indigo); }
+
+        .stat-info h3 {
+            font-size: 1.4rem; font-weight: 700; color: var(--base); line-height: 1;
+        }
+        .stat-info p {
+            font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem;
+        }
+
+        /* =============== Panels =============== */
+        .view-panel { display: none; animation: fadeUp 0.28s ease; }
+        .view-panel.active { display: block; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* =============== Card =============== */
+        .card {
+            background: var(--card);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            padding: 0.9rem 1.4rem;
+            border-bottom: 1px solid var(--border-light);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .card-header h2 {
+            font-size: 0.95rem; font-weight: 600; color: var(--base);
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .card-body { padding: 1.4rem; }
+
+        /* =============== Upload =============== */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-md);
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            transition: var(--transition);
+            cursor: pointer;
+            margin-bottom: 1.2rem;
+        }
+        .upload-zone:hover {
+            border-color: var(--base-light);
+            background: rgba(43,58,85,0.02);
+        }
+        .upload-zone.dragover {
+            border-color: var(--ambar);
+            background: var(--ambar-light);
+        }
+
+        .upload-zone .uz-icon {
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+        .upload-zone .uz-icon svg {
+            width: 40px; height: 40px;
+            stroke: var(--text-light); fill: none;
+            stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .upload-zone p { color: var(--text-mid); font-size: 0.9rem; }
+        .upload-zone p strong { color: var(--base); }
+        .upload-zone .hint { font-size: 0.76rem; color: var(--text-light); margin-top: 0.25rem; }
+
+        .file-feedback {
+            margin-top: 0.7rem;
+            padding: 0.45rem 0.9rem;
+            background: var(--oliva-light);
+            color: var(--oliva);
+            border-radius: var(--radius-sm);
+            font-size: 0.82rem;
+            display: none;
+        }
+
+        .form-row {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 1rem; margin-bottom: 1rem;
+        }
+        .form-group { display: flex; flex-direction: column; gap: 0.3rem; }
+        .form-group label {
+            font-size: 0.8rem; font-weight: 600; color: var(--text);
+        }
+        .form-group .req { color: var(--bordo); }
+
+        .form-input {
+            padding: 0.55rem 0.85rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.87rem; font-family: inherit;
+            transition: var(--transition);
+            background: #fff;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--base-light);
+            box-shadow: 0 0 0 3px rgba(43,58,85,0.08);
+        }
+        textarea.form-input { resize: vertical; min-height: 68px; }
+        .hidden-input { display: none; }
+
+        /* =============== Buttons =============== */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 0.4rem;
+            padding: 0.55rem 1.3rem;
+            border: none; border-radius: var(--radius-sm);
+            font-size: 0.85rem; font-weight: 600; font-family: inherit;
+            cursor: pointer; transition: var(--transition);
+        }
+        .btn-primary { background: var(--base); color: #fff; }
+        .btn-primary:hover { background: var(--base-light); }
+
+        .btn-accent { background: var(--ambar); color: var(--base-dark); }
+        .btn-accent:hover { background: var(--ambar-hover); }
+
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-mid); }
+        .btn-outline:hover { background: var(--bg); border-color: var(--text-muted); }
+
+        .btn-danger-outline { background: transparent; border: 1px solid var(--bordo-light); color: var(--bordo); }
+        .btn-danger-outline:hover { background: var(--bordo-light); }
+
+        .btn-confirm { background: var(--oliva); color: #fff; }
+        .btn-confirm:hover { background: #4A6935; }
+
+        .btn-sm { padding: 0.38rem 0.75rem; font-size: 0.76rem; }
+        .btn-icon { width: 32px; height: 32px; padding: 0; border-radius: 7px; }
+        .btn-block { width: 100%; }
+
+        /* =============== Toolbar & Filters =============== */
+        .docs-toolbar {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;
+        }
+
+        .filter-pills { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+
+        .pill {
+            padding: 0.3rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.76rem; font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+            background: #fff; color: var(--text-muted);
+        }
+        .pill:hover { border-color: var(--base-light); color: var(--base); }
+        .pill.active { background: var(--base); color: #fff; border-color: var(--base); }
+
+        .view-toggle {
+            display: flex;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+        .view-toggle button {
+            padding: 0.35rem 0.65rem;
+            background: #fff; border: none;
+            cursor: pointer; color: var(--text-muted);
+            transition: var(--transition);
+        }
+        .view-toggle button.active { background: var(--base); color: #fff; }
+        .view-toggle button:not(:last-child) { border-right: 1px solid var(--border); }
+
+        /* =============== Doc Cards — List =============== */
+        .doc-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+        .doc-card {
+            background: var(--card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 0.9rem 1.1rem;
+            display: flex; align-items: center; gap: 0.9rem;
+            transition: var(--transition);
+        }
+        .doc-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--border);
+        }
+
+        .doc-thumb {
+            width: 42px; height: 42px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .doc-thumb.t-pdf  { background: var(--bordo-light); color: var(--bordo); }
+        .doc-thumb.t-img  { background: #E3ECF6; color: var(--ardosia); }
+        .doc-thumb.t-gen  { background: #EDE8F3; color: var(--indigo); }
+
+        .doc-details { flex: 1; min-width: 0; }
+        .doc-details h3 {
+            font-size: 0.92rem; font-weight: 600; color: var(--text);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .doc-meta {
+            display: flex; align-items: center; gap: 0.55rem;
+            margin-top: 0.2rem; flex-wrap: wrap;
+        }
+        .doc-meta span {
+            font-size: 0.73rem; color: var(--text-muted);
+            display: flex; align-items: center; gap: 0.2rem;
+        }
+        .type-tag {
+            padding: 0.12rem 0.45rem;
+            border-radius: 3px;
+            font-size: 0.65rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.4px;
+        }
+        .type-tag.pdf { background: var(--bordo-light); color: var(--bordo); }
+        .type-tag.jpg, .type-tag.jpeg, .type-tag.png { background: #E3ECF6; color: var(--ardosia); }
+        .type-tag.geral { background: #EDE8F3; color: var(--indigo); }
+
+        .doc-desc {
+            font-size: 0.78rem; color: var(--text-muted);
+            margin-top: 0.25rem;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        .doc-actions { display: flex; align-items: center; gap: 0.35rem; flex-shrink: 0; }
+
+        /* Grid */
+        .doc-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+            gap: 0.9rem;
+        }
+        .doc-grid .doc-card {
+            flex-direction: column; align-items: stretch; padding: 1.1rem;
+        }
+        .doc-grid .doc-card .doc-thumb { width: 48px; height: 48px; margin-bottom: 0.4rem; }
+        .doc-grid .doc-card .doc-details h3 { white-space: normal; }
+        .doc-grid .doc-card .doc-actions { margin-top: 0.7rem; justify-content: flex-end; }
+
+        /* Empty */
+        .empty-state { text-align: center; padding: 3rem 1rem; }
+        .empty-state .e-icon { color: var(--text-light); margin-bottom: 0.6rem; }
+        .empty-state .e-icon svg {
+            width: 48px; height: 48px; stroke: var(--text-light);
+            fill: none; stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .empty-state h3 { font-size: 1.05rem; color: var(--text); margin-bottom: 0.25rem; }
+        .empty-state p { color: var(--text-muted); font-size: 0.85rem; }
+
+        /* =============== Comments =============== */
+        .comments-section { margin-top: 0.5rem; display: none; animation: fadeUp 0.22s ease; }
+        .comments-section.open { display: block; }
+
+        .comments-box {
+            background: var(--bg); border-radius: var(--radius-sm);
+            padding: 0.9rem; border: 1px solid var(--border-light); margin-top: 0.4rem;
+        }
+        .comment-row { display: flex; gap: 0.45rem; margin-bottom: 0.7rem; }
+        .comment-row input {
+            flex: 1; padding: 0.45rem 0.75rem;
+            border: 1px solid var(--border); border-radius: var(--radius-sm);
+            font-size: 0.82rem; font-family: inherit;
+            transition: var(--transition);
+        }
+        .comment-row input:focus {
+            outline: none; border-color: var(--base-light);
+            box-shadow: 0 0 0 3px rgba(43,58,85,0.08);
+        }
+
+        .comment-item {
+            padding: 0.55rem 0.75rem;
+            border-left: 3px solid var(--ambar);
+            background: #fff;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            margin-bottom: 0.4rem;
+            box-shadow: var(--shadow-sm);
+        }
+        .comment-item p { font-size: 0.85rem; color: var(--text); line-height: 1.45; }
+        .comment-item small { font-size: 0.7rem; color: var(--text-light); display: block; margin-top: 0.15rem; }
+
+        .no-comments { text-align: center; color: var(--text-light); font-size: 0.8rem; padding: 0.7rem; }
+
+        /* =============== Modal =============== */
+        .modal-bg {
+            display: none; position: fixed; inset: 0;
+            background: rgba(30,43,64,0.45);
+            z-index: 1000; align-items: center; justify-content: center;
+        }
+        .modal-bg.show { display: flex; }
+
+        .modal-box {
+            background: #fff; border-radius: var(--radius-lg);
+            padding: 2rem; max-width: 380px; width: 90%;
+            text-align: center; box-shadow: var(--shadow-lg);
+            animation: scaleUp 0.22s ease;
+        }
+        @keyframes scaleUp {
+            from { opacity: 0; transform: scale(0.92); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+        .modal-box .m-icon { color: var(--ambar); margin-bottom: 0.7rem; }
+        .modal-box .m-icon svg {
+            width: 40px; height: 40px; stroke: var(--ambar);
+            fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .modal-box h3 { font-size: 1.05rem; margin-bottom: 0.35rem; color: var(--text); }
+        .modal-box p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.4rem; line-height: 1.5; }
+        .modal-btns { display: flex; gap: 0.5rem; justify-content: center; }
+
+        /* =============== Toast =============== */
+        .toast-area {
+            position: fixed; top: 1rem; right: 1rem; z-index: 2000;
+            display: flex; flex-direction: column; gap: 0.45rem;
+        }
+        .toast {
+            padding: 0.7rem 1.1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.82rem; font-weight: 500;
+            display: flex; align-items: center; gap: 0.45rem;
+            box-shadow: var(--shadow-lg);
+            animation: slideIn 0.3s ease, slideOut 0.3s ease 3.5s forwards;
+            min-width: 260px; color: #fff;
+        }
+        .toast-ok    { background: var(--oliva); }
+        .toast-err   { background: var(--bordo); }
+
+        @keyframes slideIn  { from { opacity: 0; transform: translateX(80px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(60px); } }
+
+        /* Spinner */
+        .spin {
+            display: inline-block; width: 18px; height: 18px;
+            border: 2px solid var(--border); border-top-color: var(--base);
+            border-radius: 50%; animation: rotate 0.65s linear infinite;
+        }
+        @keyframes rotate { to { transform: rotate(360deg); } }
+
+        .loader { display: flex; align-items: center; justify-content: center; padding: 2rem; gap: 0.5rem; color: var(--text-muted); font-size: 0.85rem; }
+
+        /* =============== Responsive =============== */
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+            .mobile-header { display: flex; }
+            .main-content { margin-left: 0; padding-top: 52px; }
+            .topbar { top: 52px; }
+            .content { padding: 1rem; }
+            .form-row { grid-template-columns: 1fr; }
+            .search-box input { width: 150px; }
+            .doc-card { flex-direction: column; align-items: flex-start; }
+            .doc-actions { width: 100%; justify-content: flex-end; }
+            .stats-row { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 480px) {
+            .stats-row { grid-template-columns: 1fr; }
+            .topbar { flex-direction: column; gap: 0.5rem; align-items: flex-start; }
+            .search-box input { width: 100%; }
+            .topbar-actions { width: 100%; }
+            .search-box { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <button class="hamburger" onclick="toggleSidebar()">
+            <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span class="m-logo">Gestão Documental</span>
+    </div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="logo">
+                <span class="logo-mark">
+                    <svg viewBox="0 0 24 24"><path d="M12 3 L2 9 L12 15 L22 9 Z"/><path d="M2 15 L12 21 L22 15"/></svg>
+                </span>
+                Gestão Documental
+            </div>
+            <p class="tagline">Organização e Controle</p>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-label">Menu</div>
+            <div class="nav-item active" data-panel="panel-dashboard" onclick="switchPanel(this, 'panel-dashboard')">
+                <span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+                Painel
+            </div>
+            <div class="nav-item" data-panel="panel-upload" onclick="switchPanel(this, 'panel-upload')">
+                <span class="icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span>
+                Enviar Documento
+            </div>
+            <div class="nav-item" data-panel="panel-documents" onclick="switchPanel(this, 'panel-documents')">
+                <span class="icon"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg></span>
+                Documentos
+                <span class="badge" id="doc-count-badge">0</span>
+            </div>
+
+            <div class="nav-label">Sistema</div>
+            <div class="nav-item" onclick="carregarDocumentos()">
+                <span class="icon"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></span>
+                Atualizar
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">Sistema de Gestão Documental v1.0</div>
+    </aside>
+
+    <!-- Main -->
+    <div class="main-content">
+        <div class="topbar">
+            <div class="topbar-title">
+                <h1 id="page-title">Painel Geral</h1>
+                <p id="page-subtitle">Visão geral dos seus documentos</p>
+            </div>
+            <div class="topbar-actions">
+                <div class="search-box">
+                    <span class="s-icon icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+                    <input type="text" id="search-input" placeholder="Buscar documentos..." oninput="filtrarDocumentos()">
+                </div>
+                <button class="btn btn-accent btn-sm" onclick="switchPanel(document.querySelector('[data-panel=panel-upload]'), 'panel-upload')">
+                    <span class="icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+                    Novo
+                </button>
+            </div>
+        </div>
+
+        <div class="content">
+
+            <!-- ===== Dashboard ===== -->
+            <div class="view-panel active" id="panel-dashboard">
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-dot c-base">
+                            <span class="icon icon-lg" style="color:#fff"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="stat-total">0</h3>
+                            <p>Total de Documentos</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-dot c-ardosia">
+                            <span class="icon icon-lg" style="color:#fff"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="stat-pdf">0</h3>
+                            <p>Arquivos PDF</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-dot c-ambar">
+                            <span class="icon icon-lg" style="color:#fff"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="stat-img">0</h3>
+                            <p>Imagens</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-dot c-indigo">
+                            <span class="icon icon-lg" style="color:#fff"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></span>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="stat-size">0 B</h3>
+                            <p>Armazenamento</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>
+                            <span class="icon"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span>
+                            Documentos Recentes
+                        </h2>
+                        <button class="btn btn-outline btn-sm" onclick="switchPanel(document.querySelector('[data-panel=panel-documents]'), 'panel-documents')">Ver todos</button>
+                    </div>
+                    <div class="card-body" id="recent-docs">
+                        <div class="loader"><span class="spin"></span> Carregando...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Upload ===== -->
+            <div class="view-panel" id="panel-upload">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>
+                            <span class="icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span>
+                            Enviar Novo Documento
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="form-upload" enctype="multipart/form-data">
+                            <div class="upload-zone" id="upload-zone" onclick="document.getElementById('arquivo').click()">
+                                <div class="uz-icon">
+                                    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                </div>
+                                <p><strong>Clique ou arraste</strong> o arquivo aqui</p>
+                                <p class="hint">PDF, JPG ou PNG &middot; Máximo 16 MB</p>
+                                <div class="file-feedback" id="file-feedback"></div>
+                            </div>
+                            <input type="file" id="arquivo" name="arquivo" class="hidden-input" accept=".pdf,.jpg,.png" required>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="titulo">Título <span class="req">*</span></label>
+                                    <input type="text" id="titulo" name="titulo" class="form-input" required placeholder="Ex: Contrato de Locação">
+                                </div>
+                                <div class="form-group">
+                                    <label for="tipo-select">Tipo</label>
+                                    <select id="tipo-select" class="form-input">
+                                        <option value="geral">Geral</option>
+                                        <option value="contrato">Contrato</option>
+                                        <option value="procuração">Procuração</option>
+                                        <option value="petição">Petição</option>
+                                        <option value="certidão">Certidão</option>
+                                        <option value="outro">Outro</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 1.2rem;">
+                                <label for="descricao">Descrição</label>
+                                <textarea id="descricao" name="descricao" class="form-input" placeholder="Breve descrição do documento (opcional)"></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-block" id="btn-upload">Enviar Documento</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Documents ===== -->
+            <div class="view-panel" id="panel-documents">
+                <div class="docs-toolbar">
+                    <div class="filter-pills">
+                        <span class="pill active" data-filter="todos" onclick="setFilter(this, 'todos')">Todos</span>
+                        <span class="pill" data-filter="pdf" onclick="setFilter(this, 'pdf')">PDF</span>
+                        <span class="pill" data-filter="jpg" onclick="setFilter(this, 'jpg')">JPG</span>
+                        <span class="pill" data-filter="png" onclick="setFilter(this, 'png')">PNG</span>
+                    </div>
+                    <div class="view-toggle">
+                        <button class="active" id="btn-list-view" onclick="setView('list')" title="Lista">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                        </button>
+                        <button id="btn-grid-view" onclick="setView('grid')" title="Grade">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="documents-container" class="doc-list">
+                    <div class="loader"><span class="spin"></span> Carregando documentos...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal-bg" id="modal-delete">
+        <div class="modal-box">
+            <div class="m-icon">
+                <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <h3>Deletar documento?</h3>
+            <p>Esta ação é permanente. O arquivo e seus comentários serão removidos do sistema.</p>
+            <div class="modal-btns">
+                <button class="btn btn-outline" onclick="closeDeleteModal()">Cancelar</button>
+                <button class="btn btn-danger-outline" id="btn-confirm-delete" onclick="confirmarDelete()">Deletar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toasts -->
+    <div class="toast-area" id="toast-area"></div>
+
+    <!-- ============ INLINE SVG ICONS (templates) ============ -->
+    <script>
+        // Reusable SVG strings — no emojis
+        const SVG = {
+            file:    '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+            fileTxt: '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+            image:   '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
+            eye:     '<svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+            chat:    '<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>',
+            trash:   '<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>',
+            inbox:   '<svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg>',
+            calendar:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+            hdd:     '<svg viewBox="0 0 24 24"><line x1="22" y1="12" x2="2" y2="12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/><line x1="6" y1="16" x2="6.01" y2="16"/><line x1="10" y1="16" x2="10.01" y2="16"/></svg>',
+            check:   '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>',
+            x:       '<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+        };
+
+        function svgIcon(name, cls) {
+            return `<span class="icon ${cls || ''}">${SVG[name] || ''}</span>`;
+        }
+
+        // ===== State =====
+        const API = '/api/documentos';
+        let allDocs = [];
+        let currentFilter = 'todos';
+        let currentView = 'list';
+        let currentSearch = '';
+        let deleteTargetId = null;
+
+        // ===== Sidebar =====
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('show');
+        }
+
+        function switchPanel(navEl, panelId) {
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            if (navEl) navEl.classList.add('active');
+            document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(panelId).classList.add('active');
+
+            const titles = {
+                'panel-dashboard': ['Painel Geral', 'Visão geral dos seus documentos'],
+                'panel-upload': ['Enviar Documento', 'Faça upload de novos arquivos'],
+                'panel-documents': ['Documentos', `${allDocs.length} documento(s) encontrado(s)`]
+            };
+            const [t, s] = titles[panelId] || ['', ''];
+            document.getElementById('page-title').textContent = t;
+            document.getElementById('page-subtitle').textContent = s;
+
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('show');
+        }
+
+        // ===== Toast =====
+        function showToast(msg, type) {
+            const area = document.getElementById('toast-area');
+            const t = document.createElement('div');
+            t.className = `toast toast-${type === 'error' ? 'err' : 'ok'}`;
+            const iconSvg = type === 'error' ? SVG.x : SVG.check;
+            t.innerHTML = `<span class="icon" style="color:#fff">${iconSvg}</span> ${msg}`;
+            area.appendChild(t);
+            setTimeout(() => t.remove(), 4200);
+        }
+
+        // ===== Drag & Drop =====
+        const uploadZone = document.getElementById('upload-zone');
+        const fileInput = document.getElementById('arquivo');
+        const fileFeedback = document.getElementById('file-feedback');
+
+        ['dragenter', 'dragover'].forEach(ev => {
+            uploadZone.addEventListener(ev, e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+        });
+        ['dragleave', 'drop'].forEach(ev => {
+            uploadZone.addEventListener(ev, e => { e.preventDefault(); uploadZone.classList.remove('dragover'); });
+        });
+        uploadZone.addEventListener('drop', e => {
+            if (e.dataTransfer.files.length) { fileInput.files = e.dataTransfer.files; showFile(e.dataTransfer.files[0]); }
+        });
+        fileInput.addEventListener('change', () => { if (fileInput.files.length) showFile(fileInput.files[0]); });
+
+        function showFile(f) {
+            fileFeedback.style.display = 'block';
+            fileFeedback.textContent = `${f.name}  (${formatBytes(f.size)})`;
+        }
+
+        // ===== Upload =====
+        document.getElementById('form-upload').addEventListener('submit', async e => {
+            e.preventDefault();
+            const fd = new FormData(e.target);
+            const btn = document.getElementById('btn-upload');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spin"></span> Enviando...';
+
+            try {
+                const res = await fetch(API, { method: 'POST', body: fd });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast(data.mensagem || 'Documento enviado com sucesso!');
+                    e.target.reset(); fileFeedback.style.display = 'none';
+                    carregarDocumentos();
+                } else {
+                    showToast(data.erro || 'Erro ao enviar.', 'error');
+                }
+            } catch { showToast('Erro de conexão.', 'error'); }
+
+            btn.disabled = false;
+            btn.textContent = 'Enviar Documento';
+        });
+
+        // ===== Load Docs =====
+        async function carregarDocumentos() {
+            const container = document.getElementById('documents-container');
+            const recent = document.getElementById('recent-docs');
+            container.innerHTML = '<div class="loader"><span class="spin"></span> Carregando...</div>';
+
+            try {
+                const res = await fetch(API);
+                allDocs = await res.json();
+                updateStats();
+                document.getElementById('doc-count-badge').textContent = allDocs.length;
+                renderDocuments();
+                renderRecent(recent, allDocs.slice(0, 5));
+            } catch {
+                container.innerHTML = `<div class="empty-state"><div class="e-icon">${SVG.inbox}</div><h3>Erro ao carregar</h3><p>Não foi possível conectar ao servidor.</p></div>`;
+                recent.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:1rem;">Erro ao carregar.</p>';
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total').textContent = allDocs.length;
+            document.getElementById('stat-pdf').textContent = allDocs.filter(d => ext(d.nome_arquivo) === 'pdf').length;
+            document.getElementById('stat-img').textContent = allDocs.filter(d => ['jpg','jpeg','png'].includes(ext(d.nome_arquivo))).length;
+            document.getElementById('stat-size').textContent = formatBytes(allDocs.reduce((a, d) => a + (d.tamanho_bytes || 0), 0));
+            if (document.getElementById('panel-documents').classList.contains('active'))
+                document.getElementById('page-subtitle').textContent = `${allDocs.length} documento(s) encontrado(s)`;
+        }
+
+        function renderDocuments() {
+            const container = document.getElementById('documents-container');
+            let docs = allDocs;
+            if (currentFilter !== 'todos') docs = docs.filter(d => ext(d.nome_arquivo) === currentFilter);
+            if (currentSearch) { const q = currentSearch.toLowerCase(); docs = docs.filter(d => d.titulo.toLowerCase().includes(q) || (d.descricao||'').toLowerCase().includes(q)); }
+
+            if (!docs.length) {
+                container.innerHTML = `<div class="empty-state"><div class="e-icon">${SVG.inbox}</div><h3>${currentSearch || currentFilter !== 'todos' ? 'Nenhum resultado' : 'Nenhum documento'}</h3><p>${currentSearch || currentFilter !== 'todos' ? 'Tente alterar os filtros ou a busca.' : 'Envie seu primeiro documento para começar.'}</p></div>`;
+                return;
+            }
+            container.className = currentView === 'grid' ? 'doc-grid' : 'doc-list';
+            container.innerHTML = docs.map(d => docCard(d)).join('');
+        }
+
+        function docCard(doc) {
+            const e = ext(doc.nome_arquivo);
+            const isImg = ['jpg','jpeg','png'].includes(e);
+            const thumbClass = e === 'pdf' ? 't-pdf' : (isImg ? 't-img' : 't-gen');
+            const thumbIcon = e === 'pdf' ? SVG.fileTxt : (isImg ? SVG.image : SVG.file);
+            const date = new Date(doc.data_upload).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+
+            return `
+                <div class="doc-card" id="doc-${doc.id}">
+                    <div class="doc-thumb ${thumbClass}"><span class="icon icon-lg">${thumbIcon}</span></div>
+                    <div class="doc-details">
+                        <h3 title="${esc(doc.titulo)}">${esc(doc.titulo)}</h3>
+                        <div class="doc-meta">
+                            <span class="type-tag ${e}">${e.toUpperCase()}</span>
+                            <span>${svgIcon('calendar')} ${date}</span>
+                            <span>${svgIcon('hdd')} ${formatBytes(doc.tamanho_bytes)}</span>
+                        </div>
+                        ${doc.descricao ? `<p class="doc-desc">${esc(doc.descricao)}</p>` : ''}
+                    </div>
+                    <div class="doc-actions">
+                        <button class="btn btn-outline btn-icon" onclick="window.open('/uploads/${doc.nome_arquivo}')" title="Visualizar"><span class="icon">${SVG.eye}</span></button>
+                        <button class="btn btn-outline btn-icon" onclick="toggleComentarios(${doc.id})" title="Comentários"><span class="icon">${SVG.chat}</span></button>
+                        <button class="btn btn-danger-outline btn-icon" onclick="openDeleteModal(${doc.id})" title="Deletar"><span class="icon">${SVG.trash}</span></button>
+                    </div>
+                </div>
+                <div class="comments-section" id="comments-${doc.id}">
+                    <div class="comments-box">
+                        <div class="comment-row">
+                            <input type="text" id="input-com-${doc.id}" placeholder="Escreva um comentário..." onkeydown="if(event.key==='Enter')enviarComentario(${doc.id})">
+                            <button class="btn btn-confirm btn-sm" onclick="enviarComentario(${doc.id})">Enviar</button>
+                        </div>
+                        <div id="list-com-${doc.id}"><div class="loader" style="padding:0.4rem;"><span class="spin"></span></div></div>
+                    </div>
+                </div>`;
+        }
+
+        function renderRecent(container, docs) {
+            if (!docs.length) { container.innerHTML = `<div class="empty-state" style="padding:1.2rem;"><div class="e-icon">${SVG.inbox}</div><p>Nenhum documento ainda.</p></div>`; return; }
+            container.innerHTML = docs.map(doc => {
+                const e = ext(doc.nome_arquivo);
+                const isImg = ['jpg','jpeg','png'].includes(e);
+                const thumbClass = e === 'pdf' ? 't-pdf' : (isImg ? 't-img' : 't-gen');
+                const thumbIcon = e === 'pdf' ? SVG.fileTxt : (isImg ? SVG.image : SVG.file);
+                const date = new Date(doc.data_upload).toLocaleDateString('pt-BR');
+                return `
+                    <div class="doc-card" style="margin-bottom:0.4rem;">
+                        <div class="doc-thumb ${thumbClass}" style="width:34px;height:34px;"><span class="icon">${thumbIcon}</span></div>
+                        <div class="doc-details">
+                            <h3 style="font-size:0.85rem;">${esc(doc.titulo)}</h3>
+                            <div class="doc-meta"><span class="type-tag ${e}" style="font-size:0.6rem;">${e.toUpperCase()}</span><span>${date}</span><span>${formatBytes(doc.tamanho_bytes)}</span></div>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="window.open('/uploads/${doc.nome_arquivo}')">Abrir</button>
+                    </div>`;
+            }).join('');
+        }
+
+        // ===== Filters =====
+        function setFilter(pill, f) {
+            document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            currentFilter = f;
+            renderDocuments();
+        }
+
+        function setView(v) {
+            currentView = v;
+            document.getElementById('btn-list-view').classList.toggle('active', v === 'list');
+            document.getElementById('btn-grid-view').classList.toggle('active', v === 'grid');
+            renderDocuments();
+        }
+
+        function filtrarDocumentos() {
+            currentSearch = document.getElementById('search-input').value.trim();
+            renderDocuments();
+        }
+
+        // ===== Delete Modal =====
+        function openDeleteModal(id) {
+            deleteTargetId = id;
+            document.getElementById('modal-delete').classList.add('show');
+        }
+        function closeDeleteModal() {
+            deleteTargetId = null;
+            document.getElementById('modal-delete').classList.remove('show');
+        }
+        async function confirmarDelete() {
+            if (!deleteTargetId) return;
+            const btn = document.getElementById('btn-confirm-delete');
+            btn.disabled = true; btn.textContent = 'Deletando...';
+            try {
+                const res = await fetch(`${API}/${deleteTargetId}`, { method: 'DELETE' });
+                if (res.ok) { showToast('Documento deletado.'); carregarDocumentos(); }
+                else showToast('Erro ao deletar.', 'error');
+            } catch { showToast('Erro de conexão.', 'error'); }
+            btn.disabled = false; btn.textContent = 'Deletar';
+            closeDeleteModal();
+        }
+
+        // ===== Comments =====
+        async function toggleComentarios(docId) {
+            const sec = document.getElementById(`comments-${docId}`);
+            if (sec.classList.contains('open')) { sec.classList.remove('open'); return; }
+            sec.classList.add('open');
+            try {
+                const res = await fetch(`${API}/${docId}/comentarios`);
+                const coms = await res.json();
+                const list = document.getElementById(`list-com-${docId}`);
+                if (!coms.length) { list.innerHTML = '<p class="no-comments">Nenhum comentário ainda.</p>'; }
+                else { list.innerHTML = coms.map(c => `<div class="comment-item"><p>${esc(c.texto)}</p><small>${new Date(c.data_registro).toLocaleString('pt-BR')}</small></div>`).join(''); }
+            } catch (err) { console.error(err); }
+        }
+
+        async function enviarComentario(docId) {
+            const input = document.getElementById(`input-com-${docId}`);
+            const texto = input.value.trim();
+            if (!texto) return;
+            try {
+                const res = await fetch(`${API}/${docId}/comentarios`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ texto })
+                });
+                if (res.ok) {
+                    input.value = '';
+                    showToast('Comentário adicionado.');
+                    document.getElementById(`comments-${docId}`).classList.remove('open');
+                    await toggleComentarios(docId);
+                } else showToast('Erro ao enviar comentário.', 'error');
+            } catch { showToast('Erro de conexão.', 'error'); }
+        }
+
+        // ===== Helpers =====
+        function formatBytes(b) {
+            if (!b) return '0 B';
+            const k = 1024, s = ['B','KB','MB','GB'];
+            const i = Math.floor(Math.log(b) / Math.log(k));
+            return parseFloat((b / Math.pow(k, i)).toFixed(1)) + ' ' + s[i];
+        }
+        function ext(name) { return name ? name.split('.').pop().toLowerCase() : ''; }
+        function esc(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+        // Ctrl+K to focus search
+        document.addEventListener('keydown', e => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); document.getElementById('search-input').focus(); }
+        });
+
+        // Init
+        carregarDocumentos();
+    </script>
+</body>
+</html>
