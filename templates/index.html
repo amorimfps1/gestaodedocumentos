@@ -413,24 +413,55 @@
 
         /* =============== Toolbar & Filters =============== */
         .docs-toolbar {
+            display: flex; flex-direction: column; gap: 0.75rem;
+            margin-bottom: 1.2rem;
+            background: var(--card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 0.9rem 1.1rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .toolbar-header {
             display: flex; align-items: center;
             justify-content: space-between;
-            margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;
+            flex-wrap: wrap; gap: 0.6rem;
+        }
+
+        .filter-row {
+            display: flex; align-items: center;
+            gap: 0.65rem; flex-wrap: wrap;
+        }
+
+        .filter-label {
+            font-size: 0.73rem; font-weight: 700;
+            color: var(--text-mid); text-transform: uppercase;
+            letter-spacing: 0.6px; min-width: 68px;
         }
 
         .filter-pills { display: flex; gap: 0.35rem; flex-wrap: wrap; }
 
         .pill {
-            padding: 0.3rem 0.85rem;
+            padding: 0.28rem 0.8rem;
             border-radius: 20px;
             font-size: 0.76rem; font-weight: 500;
             cursor: pointer;
             transition: var(--transition);
             border: 1px solid var(--border);
             background: #fff; color: var(--text-muted);
+            user-select: none;
         }
         .pill:hover { border-color: var(--base-light); color: var(--base); }
-        .pill.active { background: var(--base); color: #fff; border-color: var(--base); }
+        .pill.active { background: var(--base); color: #fff; border-color: var(--base); font-weight: 600; }
+
+        .btn-clear-filters {
+            display: none; align-items: center; gap: 0.3rem;
+            background: none; border: 1px solid var(--border);
+            font-size: 0.73rem; font-weight: 600; color: var(--bordo);
+            cursor: pointer; padding: 0.3rem 0.65rem; border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+        .btn-clear-filters:hover { background: var(--bordo-light); border-color: var(--bordo-light); }
 
         .view-toggle {
             display: flex;
@@ -488,13 +519,29 @@
         }
         .type-tag {
             padding: 0.12rem 0.45rem;
-            border-radius: 3px;
+            border-radius: 4px;
             font-size: 0.65rem; font-weight: 700;
             text-transform: uppercase; letter-spacing: 0.4px;
         }
         .type-tag.pdf { background: var(--bordo-light); color: var(--bordo); }
         .type-tag.jpg, .type-tag.jpeg, .type-tag.png { background: #E3ECF6; color: var(--ardosia); }
-        .type-tag.geral { background: #EDE8F3; color: var(--indigo); }
+
+        /* Categorias / Tipos de Documento */
+        .cat-tag {
+            padding: 0.12rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.65rem; font-weight: 600;
+            text-transform: capitalize;
+            letter-spacing: 0.3px;
+            border: 1px solid transparent;
+            display: inline-flex; align-items: center;
+        }
+        .cat-tag.tipo-geral       { background: #EDE8F3; color: var(--indigo); border-color: #DDD5E7; }
+        .cat-tag.tipo-contrato    { background: var(--ambar-light); color: var(--ambar-hover); border-color: #E6D2B5; }
+        .cat-tag.tipo-procuracao  { background: var(--oliva-light); color: var(--oliva); border-color: #CDE0C3; }
+        .cat-tag.tipo-peticao     { background: #E4E7F4; color: #2B3A70; border-color: #CBD3ED; }
+        .cat-tag.tipo-certidao    { background: #E0F2F1; color: #1E6B65; border-color: #B2DFDB; }
+        .cat-tag.tipo-outro       { background: #ECEFF1; color: #546E7A; border-color: #CFD8DC; }
 
         .doc-desc {
             font-size: 0.78rem; color: var(--text-muted);
@@ -630,6 +677,8 @@
             .doc-card { flex-direction: column; align-items: flex-start; }
             .doc-actions { width: 100%; justify-content: flex-end; }
             .stats-row { grid-template-columns: 1fr 1fr; }
+            .toolbar-header { flex-direction: column; align-items: flex-start; }
+            .filter-row { width: 100%; }
         }
         @media (max-width: 480px) {
             .stats-row { grid-template-columns: 1fr; }
@@ -818,19 +867,42 @@
             <!-- ===== Documents ===== -->
             <div class="view-panel" id="panel-documents">
                 <div class="docs-toolbar">
-                    <div class="filter-pills">
-                        <span class="pill active" data-filter="todos" onclick="setFilter(this, 'todos')">Todos</span>
-                        <span class="pill" data-filter="pdf" onclick="setFilter(this, 'pdf')">PDF</span>
-                        <span class="pill" data-filter="jpg" onclick="setFilter(this, 'jpg')">JPG</span>
-                        <span class="pill" data-filter="png" onclick="setFilter(this, 'png')">PNG</span>
+                    <div class="toolbar-header">
+                        <div class="filter-row">
+                            <span class="filter-label">Formato:</span>
+                            <div class="filter-pills" id="pills-ext">
+                                <span class="pill active" data-ext="todos" onclick="setExtFilter(this, 'todos')">Todos</span>
+                                <span class="pill" data-ext="pdf" onclick="setExtFilter(this, 'pdf')">PDF</span>
+                                <span class="pill" data-ext="jpg" onclick="setExtFilter(this, 'jpg')">JPG</span>
+                                <span class="pill" data-ext="png" onclick="setExtFilter(this, 'png')">PNG</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.6rem;">
+                            <button id="btn-reset-filters" class="btn-clear-filters" onclick="resetFilters()" title="Limpar todos os filtros">
+                                <span class="icon" style="width:14px;height:14px;"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>
+                                Limpar filtros
+                            </button>
+                            <div class="view-toggle">
+                                <button class="active" id="btn-list-view" onclick="setView('list')" title="Lista">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                                </button>
+                                <button id="btn-grid-view" onclick="setView('grid')" title="Grade">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="view-toggle">
-                        <button class="active" id="btn-list-view" onclick="setView('list')" title="Lista">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                        </button>
-                        <button id="btn-grid-view" onclick="setView('grid')" title="Grade">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-                        </button>
+                    <div class="filter-row">
+                        <span class="filter-label">Tipo:</span>
+                        <div class="filter-pills" id="pills-tipo">
+                            <span class="pill active" data-tipo="todos" onclick="setTypeFilter(this, 'todos')">Todos</span>
+                            <span class="pill" data-tipo="geral" onclick="setTypeFilter(this, 'geral')">Geral</span>
+                            <span class="pill" data-tipo="contrato" onclick="setTypeFilter(this, 'contrato')">Contrato</span>
+                            <span class="pill" data-tipo="procuração" onclick="setTypeFilter(this, 'procuração')">Procuração</span>
+                            <span class="pill" data-tipo="petição" onclick="setTypeFilter(this, 'petição')">Petição</span>
+                            <span class="pill" data-tipo="certidão" onclick="setTypeFilter(this, 'certidão')">Certidão</span>
+                            <span class="pill" data-tipo="outro" onclick="setTypeFilter(this, 'outro')">Outro</span>
+                        </div>
                     </div>
                 </div>
 
@@ -883,10 +955,25 @@
         // ===== State =====
         const API = '/api/documentos';
         let allDocs = [];
-        let currentFilter = 'todos';
+        let currentExtFilter = 'todos';
+        let currentTypeFilter = 'todos';
         let currentView = 'list';
         let currentSearch = '';
         let deleteTargetId = null;
+
+        // Normalização de string para busca e filtro sem distinção de acentos/maiúsculas
+        function normStr(str) {
+            return (str || '').toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        }
+
+        // Mapeia o tipo para classe CSS correspondente
+        function getTipoClass(tipo) {
+            const t = normStr(tipo || 'geral');
+            if (['contrato', 'procuracao', 'peticao', 'certidao', 'geral', 'outro'].includes(t)) {
+                return `tipo-${t}`;
+            }
+            return 'tipo-outro';
+        }
 
         // ===== Sidebar =====
         function toggleSidebar() {
@@ -908,6 +995,10 @@
             const [t, s] = titles[panelId] || ['', ''];
             document.getElementById('page-title').textContent = t;
             document.getElementById('page-subtitle').textContent = s;
+
+            if (panelId === 'panel-documents') {
+                renderDocuments();
+            }
 
             document.getElementById('sidebar').classList.remove('open');
             document.getElementById('sidebarOverlay').classList.remove('show');
@@ -1046,12 +1137,36 @@
 
         function renderDocuments() {
             const container = document.getElementById('documents-container');
+            const resetBtn = document.getElementById('btn-reset-filters');
+            const hasActiveFilter = (currentExtFilter !== 'todos' || currentTypeFilter !== 'todos' || !!currentSearch);
+            if (resetBtn) {
+                resetBtn.style.display = hasActiveFilter ? 'inline-flex' : 'none';
+            }
+
             let docs = allDocs;
-            if (currentFilter !== 'todos') docs = docs.filter(d => ext(d.nome_arquivo) === currentFilter);
-            if (currentSearch) { const q = currentSearch.toLowerCase(); docs = docs.filter(d => d.titulo.toLowerCase().includes(q) || (d.descricao||'').toLowerCase().includes(q)); }
+            if (currentExtFilter !== 'todos') {
+                docs = docs.filter(d => ext(d.nome_arquivo) === currentExtFilter);
+            }
+            if (currentTypeFilter !== 'todos') {
+                const targetType = normStr(currentTypeFilter);
+                docs = docs.filter(d => normStr(d.tipo || 'geral') === targetType);
+            }
+            if (currentSearch) {
+                const q = normStr(currentSearch);
+                docs = docs.filter(d =>
+                    normStr(d.titulo).includes(q) ||
+                    normStr(d.descricao).includes(q) ||
+                    normStr(d.tipo).includes(q)
+                );
+            }
+
+            if (document.getElementById('panel-documents').classList.contains('active')) {
+                const filterNote = hasActiveFilter ? ` (${docs.length} de ${allDocs.length} exibido(s))` : '';
+                document.getElementById('page-subtitle').textContent = `${docs.length} documento(s) encontrado(s)${filterNote}`;
+            }
 
             if (!docs.length) {
-                container.innerHTML = `<div class="empty-state"><div class="e-icon">${SVG.inbox}</div><h3>${currentSearch || currentFilter !== 'todos' ? 'Nenhum resultado' : 'Nenhum documento'}</h3><p>${currentSearch || currentFilter !== 'todos' ? 'Tente alterar os filtros ou a busca.' : 'Envie seu primeiro documento para começar.'}</p></div>`;
+                container.innerHTML = `<div class="empty-state"><div class="e-icon">${SVG.inbox}</div><h3>${hasActiveFilter ? 'Nenhum resultado' : 'Nenhum documento'}</h3><p>${hasActiveFilter ? 'Tente alterar os filtros ou a busca.' : 'Envie seu primeiro documento para começar.'}</p></div>`;
                 return;
             }
             container.className = currentView === 'grid' ? 'doc-grid' : 'doc-list';
@@ -1064,6 +1179,8 @@
             const thumbClass = e === 'pdf' ? 't-pdf' : (isImg ? 't-img' : 't-gen');
             const thumbIcon = e === 'pdf' ? SVG.fileTxt : (isImg ? SVG.image : SVG.file);
             const date = new Date(doc.data_upload).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+            const tipoLabel = doc.tipo ? doc.tipo : 'geral';
+            const tipoClass = getTipoClass(doc.tipo);
 
             return `
                 <div class="doc-card" id="doc-${doc.id}">
@@ -1072,6 +1189,7 @@
                         <h3 title="${esc(doc.titulo)}">${esc(doc.titulo)}</h3>
                         <div class="doc-meta">
                             <span class="type-tag ${e}">${e.toUpperCase()}</span>
+                            <span class="cat-tag ${tipoClass}" title="Tipo: ${esc(tipoLabel)}">${esc(tipoLabel)}</span>
                             <span>${svgIcon('calendar')} ${date}</span>
                             <span>${svgIcon('hdd')} ${formatBytes(doc.tamanho_bytes)}</span>
                         </div>
@@ -1102,12 +1220,19 @@
                 const thumbClass = e === 'pdf' ? 't-pdf' : (isImg ? 't-img' : 't-gen');
                 const thumbIcon = e === 'pdf' ? SVG.fileTxt : (isImg ? SVG.image : SVG.file);
                 const date = new Date(doc.data_upload).toLocaleDateString('pt-BR');
+                const tipoLabel = doc.tipo ? doc.tipo : 'geral';
+                const tipoClass = getTipoClass(doc.tipo);
                 return `
                     <div class="doc-card" style="margin-bottom:0.4rem;">
                         <div class="doc-thumb ${thumbClass}" style="width:34px;height:34px;"><span class="icon">${thumbIcon}</span></div>
                         <div class="doc-details">
                             <h3 style="font-size:0.85rem;">${esc(doc.titulo)}</h3>
-                            <div class="doc-meta"><span class="type-tag ${e}" style="font-size:0.6rem;">${e.toUpperCase()}</span><span>${date}</span><span>${formatBytes(doc.tamanho_bytes)}</span></div>
+                            <div class="doc-meta">
+                                <span class="type-tag ${e}" style="font-size:0.6rem;">${e.toUpperCase()}</span>
+                                <span class="cat-tag ${tipoClass}" style="font-size:0.6rem;">${esc(tipoLabel)}</span>
+                                <span>${date}</span>
+                                <span>${formatBytes(doc.tamanho_bytes)}</span>
+                            </div>
                         </div>
                         <button class="btn btn-outline btn-sm" onclick="window.open('/uploads/${doc.nome_arquivo}')">Abrir</button>
                     </div>`;
@@ -1115,10 +1240,32 @@
         }
 
         // ===== Filters =====
-        function setFilter(pill, f) {
-            document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+        function setExtFilter(pill, f) {
+            document.querySelectorAll('#pills-ext .pill').forEach(p => p.classList.remove('active'));
             pill.classList.add('active');
-            currentFilter = f;
+            currentExtFilter = f;
+            renderDocuments();
+        }
+
+        function setTypeFilter(pill, f) {
+            document.querySelectorAll('#pills-tipo .pill').forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            currentTypeFilter = f;
+            renderDocuments();
+        }
+
+        function resetFilters() {
+            currentExtFilter = 'todos';
+            currentTypeFilter = 'todos';
+            currentSearch = '';
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) searchInput.value = '';
+            document.querySelectorAll('#pills-ext .pill').forEach(p => {
+                p.classList.toggle('active', p.dataset.ext === 'todos');
+            });
+            document.querySelectorAll('#pills-tipo .pill').forEach(p => {
+                p.classList.toggle('active', p.dataset.tipo === 'todos');
+            });
             renderDocuments();
         }
 

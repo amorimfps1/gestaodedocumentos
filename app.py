@@ -106,21 +106,39 @@ upload_parser = api.parser()
 upload_parser.add_argument('arquivo', location='files', type=FileStorage, required=True, help='Arquivo (PDF, JPG, PNG - máx. 16 MB)')
 upload_parser.add_argument('titulo', location='form', type=str, required=True, help='Título do documento')
 upload_parser.add_argument('descricao', location='form', type=str, required=False, help='Descrição do documento')
+upload_parser.add_argument('tipo', location='form', type=str, required=False, default='geral', help='Tipo/categoria do documento (ex: geral, contrato, procuração, petição, certidão, outro)')
 
 
 # --- Endpoints da API ---
 
 @ns.route('')
 class DocumentoLista(Resource):
-    @ns.doc('listar_documentos')
+    @ns.doc('listar_documentos', params={
+        'tipo': 'Filtrar documentos por tipo (ex: geral, contrato, procuração, petição, certidão, outro)',
+        'ext': 'Filtrar documentos por extensão (ex: pdf, jpg, png)'
+    })
     @ns.marshal_list_with(documento_model)
     @ns.response(200, 'Lista de documentos retornada com sucesso')
     def get(self):
-        """Lista todos os documentos cadastrados."""
+        """Lista os documentos cadastrados, com suporte a filtros opcionais por tipo e extensão."""
+        tipo_filtro = request.args.get('tipo', '').strip().lower()
+        ext_filtro = request.args.get('ext', '').strip().lower()
+
+        query = 'SELECT id, titulo, descricao, tipo, nome_arquivo, tamanho_bytes, data_upload FROM documentos WHERE 1=1'
+        params = []
+
+        if tipo_filtro and tipo_filtro != 'todos':
+            query += ' AND lower(tipo) = ?'
+            params.append(tipo_filtro)
+
+        if ext_filtro and ext_filtro != 'todos':
+            query += ' AND lower(nome_arquivo) LIKE ?'
+            params.append(f'%.{ext_filtro}')
+
+        query += ' ORDER BY data_upload DESC'
+
         with get_db_connection() as conn:
-            documentos = conn.execute(
-                'SELECT id, titulo, descricao, tipo, nome_arquivo, tamanho_bytes, data_upload FROM documentos ORDER BY data_upload DESC'
-            ).fetchall()
+            documentos = conn.execute(query, params).fetchall()
         return [dict(doc) for doc in documentos], 200
 
     @ns.doc('upload_documento')

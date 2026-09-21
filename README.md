@@ -64,8 +64,11 @@ Além da interface web responsiva, o sistema disponibiliza uma API REST padroniz
 - Medição e exibição do volume total de armazenamento utilizado em bytes.
 
 ### 3. Pesquisa, Filtros e Modos de Exibição
-- Busca em tempo real aplicada a título e descrição.
-- Filtros rápidos de seleção por formato de arquivo.
+- Busca em tempo real aplicada a título, descrição e tipo de documento.
+- Filtros rápidos por formato de arquivo (Todos, PDF, JPG, PNG).
+- Filtros rápidos por tipo/categoria de documento (Todos, Geral, Contrato, Procuração, Petição, Certidão, Outro).
+- Filtragem combinada (ex: exibir apenas contratos em formato PDF) com opção de limpeza rápida de filtros.
+- Badges visuais coloridos para identificação imediata de tipo e formato nos cards de documento.
 - Alternância de visualização entre formatos de Lista e Grade (Cards).
 - Ordenação cronológica decrescente automática com base na data de envio.
 
@@ -132,8 +135,8 @@ A API disponibiliza endpoints REST sob o prefixo `/api/documentos`. A interface 
 | :--- | :--- | :--- | :--- | :--- |
 | GET | `/` | Interface web principal (SPA) | Nenhuma | 200 OK |
 | GET | `/docs` | Documentação interativa Swagger UI | Nenhuma | 200 OK |
-| GET | `/api/documentos` | Retorna a listagem completa de documentos | Nenhuma | 200 OK |
-| POST | `/api/documentos` | Realiza o upload de um novo documento | `multipart/form-data`<br>- `arquivo`: Arquivo (PDF, JPG, PNG)<br>- `titulo`: String (obrigatório)<br>- `descricao`: String (opcional) | 201 Created |
+| GET | `/api/documentos` | Retorna a listagem de documentos (com filtros opcionais) | Query params opcionais:<br>- `tipo`: String (ex: `contrato`)<br>- `ext`: String (ex: `pdf`) | 200 OK |
+| POST | `/api/documentos` | Realiza o upload de um novo documento | `multipart/form-data`<br>- `arquivo`: Arquivo (PDF, JPG, PNG)<br>- `titulo`: String (obrigatório)<br>- `descricao`: String (opcional)<br>- `tipo`: String (opcional, padrão `geral`) | 201 Created |
 | GET | `/api/documentos/<id>` | Retorna os detalhes de um documento específico | Parâmetro de rota: `id` (int) | 200 OK |
 | DELETE | `/api/documentos/<id>` | Deleta o documento, arquivo físico e comentários | Parâmetro de rota: `id` (int) | 200 OK |
 | GET | `/uploads/<nome_arquivo>` | Serve o arquivo salvo para leitura ou download | Parâmetro de rota: `nome_arquivo` (string) | 200 OK |

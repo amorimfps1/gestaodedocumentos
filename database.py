@@ -6,6 +6,9 @@ DB_NAME = 'app.db'
 
 def get_db_path():
     """Retorna o caminho absoluto do banco de dados."""
+    env_db = os.environ.get('DATABASE_PATH')
+    if env_db:
+        return env_db
     base_dir = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(base_dir, DB_NAME)
 
