@@ -4,8 +4,19 @@ Solução web para armazenamento, categorização, gerenciamento e consulta de d
 
 ---
 
+## 🌐 Acesso Online (Deploy Público & Documentação)
+
+| Recurso | Link de Acesso | Descrição |
+| :--- | :--- | :--- |
+| **Aplicação Web (Produção)** | [https://gestaodedocumentos.onrender.com](https://gestaodedocumentos.onrender.com) | Interface SPA para upload, consulta e anotações |
+| **Swagger UI (API Docs)** | [https://gestaodedocumentos.onrender.com/docs](https://gestaodedocumentos.onrender.com/docs) | Documentação interativa OpenAPI dos endpoints REST |
+| **Repositório GitHub** | [https://github.com/amorimfps1/gestaodedocumentos](https://github.com/amorimfps1/gestaodedocumentos) | Código-fonte versionado e documentado |
+
+---
+
 ## Sumário
 
+- [Acesso Online (Deploy Público)](#-acesso-online-deploy-público--documentação)
 - [Visão Geral](#visão-geral)
 - [Arquitetura e Tecnologias](#arquitetura-e-tecnologias)
 - [Funcionalidades](#funcionalidades)

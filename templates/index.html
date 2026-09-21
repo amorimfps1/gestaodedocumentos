@@ -784,7 +784,7 @@
                                 <p class="hint">PDF, JPG ou PNG &middot; Máximo 16 MB</p>
                                 <div class="file-feedback" id="file-feedback"></div>
                             </div>
-                            <input type="file" id="arquivo" name="arquivo" class="hidden-input" accept=".pdf,.jpg,.png" required>
+                            <input type="file" id="arquivo" name="arquivo" class="hidden-input" accept=".pdf,.jpg,.jpeg,.png">
 
                             <div class="form-row">
                                 <div class="form-group">
@@ -793,7 +793,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="tipo-select">Tipo</label>
-                                    <select id="tipo-select" class="form-input">
+                                    <select id="tipo-select" name="tipo" class="form-input">
                                         <option value="geral">Geral</option>
                                         <option value="contrato">Contrato</option>
                                         <option value="procuração">Procuração</option>
@@ -935,10 +935,38 @@
         ['dragleave', 'drop'].forEach(ev => {
             uploadZone.addEventListener(ev, e => { e.preventDefault(); uploadZone.classList.remove('dragover'); });
         });
+        const allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
+
+        function isFileAllowed(file) {
+            if (!file || !file.name) return false;
+            return allowedExtensions.includes(ext(file.name));
+        }
+
         uploadZone.addEventListener('drop', e => {
-            if (e.dataTransfer.files.length) { fileInput.files = e.dataTransfer.files; showFile(e.dataTransfer.files[0]); }
+            if (e.dataTransfer.files.length) {
+                const droppedFile = e.dataTransfer.files[0];
+                if (!isFileAllowed(droppedFile)) {
+                    showToast(`Formato "${ext(droppedFile.name).toUpperCase()}" não permitido. Apenas PDF, JPG ou PNG.`, 'error');
+                    fileInput.value = '';
+                    fileFeedback.style.display = 'none';
+                    return;
+                }
+                fileInput.files = e.dataTransfer.files;
+                showFile(droppedFile);
+            }
         });
-        fileInput.addEventListener('change', () => { if (fileInput.files.length) showFile(fileInput.files[0]); });
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length) {
+                const selectedFile = fileInput.files[0];
+                if (!isFileAllowed(selectedFile)) {
+                    showToast(`Formato "${ext(selectedFile.name).toUpperCase()}" não permitido. Apenas PDF, JPG ou PNG.`, 'error');
+                    fileInput.value = '';
+                    fileFeedback.style.display = 'none';
+                    return;
+                }
+                showFile(selectedFile);
+            }
+        });
 
         function showFile(f) {
             fileFeedback.style.display = 'block';
@@ -948,6 +976,25 @@
         // ===== Upload =====
         document.getElementById('form-upload').addEventListener('submit', async e => {
             e.preventDefault();
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showToast('Por favor, selecione um arquivo (PDF, JPG ou PNG).', 'error');
+                return;
+            }
+
+            const arquivo = fileInput.files[0];
+            if (!isFileAllowed(arquivo)) {
+                showToast(`Formato "${ext(arquivo.name).toUpperCase()}" não permitido. Selecione apenas PDF, JPG ou PNG.`, 'error');
+                return;
+            }
+
+            const tituloInput = document.getElementById('titulo');
+            if (!tituloInput.value || !tituloInput.value.trim()) {
+                showToast('Por favor, preencha o título do documento.', 'error');
+                tituloInput.focus();
+                return;
+            }
+
             const fd = new FormData(e.target);
             const btn = document.getElementById('btn-upload');
             btn.disabled = true;

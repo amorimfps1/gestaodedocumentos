@@ -12,7 +12,8 @@ from database import init_db, get_db_path
 app = Flask(__name__)
 
 # --- Configurações ---
-UPLOAD_FOLDER = 'uploads'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
 ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB máximo
@@ -134,9 +135,17 @@ class DocumentoLista(Resource):
         arquivo = request.files['arquivo']
         titulo = request.form.get('titulo')
         descricao = request.form.get('descricao', '')
+        tipo = request.form.get('tipo', 'geral')
+        if not tipo or not tipo.strip():
+            tipo = 'geral'
+        else:
+            tipo = tipo.strip().lower()
 
-        if not arquivo or arquivo.filename == '' or not titulo:
+        if not arquivo or arquivo.filename == '' or not titulo or not titulo.strip():
             return {'erro': 'Arquivo e título são obrigatórios'}, 400
+
+        titulo = titulo.strip()
+        descricao = descricao.strip() if descricao else ''
 
         if not allowed_file(arquivo.filename):
             return {'erro': 'Formato de arquivo não permitido (apenas PDF, JPG, PNG)'}, 400
@@ -149,14 +158,24 @@ class DocumentoLista(Resource):
 
         tamanho = os.path.getsize(caminho_salvamento)
 
-        with get_db_connection() as conn:
-            conn.execute(
-                'INSERT INTO documentos (titulo, descricao, nome_arquivo, caminho_arquivo, tamanho_bytes) VALUES (?, ?, ?, ?, ?)',
-                (titulo, descricao, unique_name, caminho_salvamento, tamanho)
-            )
-            conn.commit()
+        try:
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    'INSERT INTO documentos (titulo, descricao, tipo, nome_arquivo, caminho_arquivo, tamanho_bytes) VALUES (?, ?, ?, ?, ?, ?)',
+                    (titulo, descricao, tipo, unique_name, caminho_salvamento, tamanho)
+                )
+                conn.commit()
+                novo_id = cursor.lastrowid
+        except Exception:
+            if os.path.exists(caminho_salvamento):
+                try:
+                    os.remove(caminho_salvamento)
+                except OSError:
+                    pass
+            raise
 
-        return {'mensagem': 'Documento salvo com sucesso'}, 201
+        return {'mensagem': 'Documento salvo com sucesso', 'id': novo_id}, 201
 
 
 @ns.route('/<int:doc_id>')
@@ -214,7 +233,7 @@ class ComentarioLista(Resource):
                 return {'erro': 'Documento não encontrado'}, 404
 
             comentarios = conn.execute(
-                'SELECT id, texto, data_registro FROM comentarios WHERE documento_id = ? ORDER BY data_registro DESC',
+                'SELECT id, documento_id, texto, data_registro FROM comentarios WHERE documento_id = ? ORDER BY data_registro DESC',
                 (doc_id,)
             ).fetchall()
 
@@ -254,5 +273,6 @@ app.register_blueprint(api_bp)
 init_db()
 
 if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
     debug_mode = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
-    app.run(debug=debug_mode)
+    app.run(host='0.0.0.0', port=port, debug=debug_mode)
