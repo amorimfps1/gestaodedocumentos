@@ -8,8 +8,8 @@ Solução web para armazenamento, categorização, gerenciamento e consulta de d
 
 | Recurso | Link de Acesso | Descrição |
 | :--- | :--- | :--- |
-| **Aplicação Web (Produção)** | [https://gestaodedocumentos.onrender.com](https://gestaodedocumentos.onrender.com) | Interface SPA para upload, consulta e anotações |
-| **Swagger UI (API Docs)** | [https://gestaodedocumentos.onrender.com/docs](https://gestaodedocumentos.onrender.com/docs) | Documentação interativa OpenAPI dos endpoints REST |
+| **Aplicação Web (Produção)** | [gestao-documental.onrender.com](gestao-documental.onrender.com) | Interface SPA para upload, consulta e anotações |
+| **Swagger UI (API Docs)** | [gestao-documental.onrender.com/docs](gestao-documental.onrender.com/docs) | Documentação interativa OpenAPI dos endpoints REST |
 | **Repositório GitHub** | [https://github.com/amorimfps1/gestaodedocumentos](https://github.com/amorimfps1/gestaodedocumentos) | Código-fonte versionado e documentado |
 
 ---
